@@ -54,10 +54,15 @@ jobs:
       name: staging
       url: https://simple-webapp-staging.example.com
     steps:
+      - name: ⏳ Awaiting approval to deploy to staging
+        run: |
+          echo "This job requires manual approval from repository maintainers"
+          echo "Approval required for: Staging Deployment"
+          echo "Go to Actions tab to review and approve this deployment"
       - name: Deploy to staging
         run: |
-          echo "🚀 Deploying to staging environment..."
-          echo "📦 Image: ${{ needs.build-and-push.outputs.image }}"
+          echo "Deploying to staging environment..."
+          echo "Image: ${{ needs.build-and-push.outputs.image }}"
           echo ""
           echo "Mock deployment command:"
           echo "gcloud run deploy simple-webapp \\"
@@ -66,7 +71,7 @@ jobs:
           echo "  --platform managed \\"
           echo "  --environment staging"
           echo ""
-          echo "✅ Staging deployment approved and simulated successfully!"
+          echo "Staging deployment approved and simulated successfully!"
           echo "Service URL: https://simple-webapp-staging.example.com"
 
   deploy-production:
@@ -76,10 +81,15 @@ jobs:
       name: production
       url: https://simple-webapp.example.com
     steps:
+      - name: ⏳ Awaiting approval to deploy to production
+        run: |
+          echo "This job requires manual approval from repository maintainers"
+          echo "Approval required for: Production Deployment"
+          echo "Go to Actions tab to review and approve this deployment"
       - name: Deploy to production
         run: |
-          echo "🚀 Deploying to production environment..."
-          echo "📦 Image: ${{ needs.build-and-push.outputs.image }}"
+          echo "Deploying to production environment..."
+          echo "Image: ${{ needs.build-and-push.outputs.image }}"
           echo ""
           echo "Mock deployment command:"
           echo "gcloud run deploy simple-webapp \\"
@@ -88,6 +98,6 @@ jobs:
           echo "  --platform managed \\"
           echo "  --environment production"
           echo ""
-          echo "✅ Production deployment approved and simulated successfully!"
+          echo "Production deployment approved and simulated successfully!"
           echo "Service URL: https://simple-webapp.example.com"
 
