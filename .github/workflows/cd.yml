@@ -37,10 +37,10 @@ jobs:
           context: ./${{ matrix.app.name }}
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app.image }}:sha-${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app.image }}:latest
+            ${{ env.REGISTRY }}/${{ github.repository_owner | lower }}/${{ matrix.app.image }}:sha-${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner | lower }}/${{ matrix.app.image }}:latest
       - name: Set outputs
-        run: echo "image=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app.image }}:sha-${{ github.sha }}" >> $GITHUB_OUTPUT
+        run: echo "image=${{ env.REGISTRY }}/${{ github.repository_owner | lower }}/${{ matrix.app.image }}:sha-${{ github.sha }}" >> $GITHUB_OUTPUT
 
   deploy-staging:
     needs: [build-and-push]
