@@ -17,9 +17,16 @@ jobs:
           - name: simple-webapp
             image: simple-webapp
     outputs:
-      image: ${{ steps.build.outputs.image }}
+      image: ${{ steps.meta.outputs.image }}
     steps:
       - uses: actions/checkout@v4
+      - name: Set lowercase repo owner
+        id: meta
+        run: |
+          REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_BASE="${{ env.REGISTRY }}/${REPO_OWNER}/${{ matrix.app.image }}"
+          echo "image=${IMAGE_BASE}:sha-${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "image-latest=${IMAGE_BASE}:latest" >> $GITHUB_OUTPUT
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -37,10 +44,8 @@ jobs:
           context: ./${{ matrix.app.name }}
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository_owner | lower }}/${{ matrix.app.image }}:sha-${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ github.repository_owner | lower }}/${{ matrix.app.image }}:latest
-      - name: Set outputs
-        run: echo "image=${{ env.REGISTRY }}/${{ github.repository_owner | lower }}/${{ matrix.app.image }}:sha-${{ github.sha }}" >> $GITHUB_OUTPUT
+            ${{ steps.meta.outputs.image }}
+            ${{ steps.meta.outputs.image-latest }}
 
   deploy-staging:
     needs: [build-and-push]
