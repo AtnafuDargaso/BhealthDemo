@@ -1,3 +1,40 @@
+# Deployment Environments: Staging & Production
+
+This project uses GitHub Actions to automate deployments to two environments:
+
+- **staging**: For pre-production testing and validation.
+- **production**: For live, user-facing releases.
+
+## Environment Setup in GitHub
+
+1. Go to your repository on GitHub.
+2. Navigate to **Settings → Environments**.
+3. Create environments named `staging` and `production`.
+4. For each environment, you can add:
+    - **Secrets** (for sensitive values, e.g., API keys, tokens)
+    - **Variables** (for non-sensitive config, e.g., ENVIRONMENT name)
+
+### Example Secrets and Variables
+
+**Secrets:**
+
+- `GHCR_PAT`: GitHub Container Registry Personal Access Token (required for Docker image push)
+
+**Variables:**
+
+- `ENVIRONMENT`: Set to `staging` or `production` as appropriate
+
+These are referenced in the workflow as `${{ secrets.GHCR_PAT }}` and `${{ vars.ENVIRONMENT }}`.
+
+## Deployment Workflow
+
+The workflow in `.github/workflows/cd.yml` will:
+
+1. Build and push a Docker image to GHCR.
+2. Deploy to **staging** (manual approval required).
+3. Deploy to **production** (manual approval required, after staging).
+
+Each environment can have its own secrets and variables, which are securely injected during deployment.
 # BhealthDemo
 
 Hi — this is my Bhealth demo project. It's a small web application I'm using to experiment with features, CI/CD, and local development workflows.
