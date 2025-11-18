@@ -2,9 +2,9 @@ name: Terraform CI/CD
 
 on:
   push:
-    branches: [ terraform-gcp ]
+    branches: [ main ]
   pull_request:
-    branches: [ terraform-gcp ]
+    branches: [ main ]
 
 jobs:
   terraform:
