@@ -5,11 +5,17 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: ghcr.io/atnafudargaso/bhealthdemo
+  REGISTRY: ghcr.io
+  REGISTRY_USERNAME: ${{ github.actor }}
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app:
+          - name: simple-webapp
+            image: simple-webapp
     outputs:
       image: ${{ steps.build.outputs.image }}
     steps:
@@ -21,26 +27,62 @@ jobs:
       - name: Log in to GHCR
         uses: docker/login-action@v2
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.REGISTRY_USERNAME }}
           password: ${{ secrets.GHCR_PAT }}
-      - name: Build and push
+      - name: Build and push ${{ matrix.app.name }}
         id: build
         uses: docker/build-push-action@v5
         with:
-          context: ./simple-webapp
+          context: ./${{ matrix.app.name }}
           push: true
           tags: |
-            ${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app.image }}:sha-${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app.image }}:latest
       - name: Set outputs
-        run: echo "image=${{ env.IMAGE_NAME }}:sha-${{ github.sha }}" >> $GITHUB_OUTPUT
+        run: echo "image=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.app.image }}:sha-${{ github.sha }}" >> $GITHUB_OUTPUT
 
   deploy-staging:
     needs: [build-and-push]
     runs-on: ubuntu-latest
-    environment: staging
+    environment: 
+      name: staging
+      url: https://simple-webapp-staging.example.com
     steps:
-      - name: Deploy to staging (example)
+      - name: Deploy to staging
         run: |
-          echo "Replace this with your deployment commands (kubectl/ssh/terraform)."
+          echo "🚀 Deploying to staging environment..."
+          echo "📦 Image: ${{ needs.build-and-push.outputs.image }}"
+          echo ""
+          echo "Mock deployment command:"
+          echo "gcloud run deploy simple-webapp \\"
+          echo "  --image ${{ needs.build-and-push.outputs.image }} \\"
+          echo "  --region us-central1 \\"
+          echo "  --platform managed \\"
+          echo "  --environment staging"
+          echo ""
+          echo "✅ Staging deployment approved and simulated successfully!"
+          echo "Service URL: https://simple-webapp-staging.example.com"
+
+  deploy-production:
+    needs: [build-and-push, deploy-staging]
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://simple-webapp.example.com
+    steps:
+      - name: Deploy to production
+        run: |
+          echo "🚀 Deploying to production environment..."
+          echo "📦 Image: ${{ needs.build-and-push.outputs.image }}"
+          echo ""
+          echo "Mock deployment command:"
+          echo "gcloud run deploy simple-webapp \\"
+          echo "  --image ${{ needs.build-and-push.outputs.image }} \\"
+          echo "  --region us-central1 \\"
+          echo "  --platform managed \\"
+          echo "  --environment production"
+          echo ""
+          echo "✅ Production deployment approved and simulated successfully!"
+          echo "Service URL: https://simple-webapp.example.com"
+

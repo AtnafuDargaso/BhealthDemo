@@ -1,0 +1,46 @@
+name: CD
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: ghcr.io/atnafudargaso/bhealthdemo
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.build.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: ./simple-webapp
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+            ${{ env.IMAGE_NAME }}:latest
+      - name: Set outputs
+        run: echo "image=${{ env.IMAGE_NAME }}:sha-${{ github.sha }}" >> $GITHUB_OUTPUT
+
+  deploy-staging:
+    needs: [build-and-push]
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Deploy to staging (example)
+        run: |
+          echo "Replace this with your deployment commands (kubectl/ssh/terraform)."
